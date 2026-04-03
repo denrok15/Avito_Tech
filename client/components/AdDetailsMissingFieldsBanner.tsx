@@ -1,4 +1,4 @@
-import { Box, Icon, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { AlertIcon } from "@/icons";
 type AdDetailsMissingFieldsBannerProps = {
   fields: string[];

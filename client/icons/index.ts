@@ -1,1 +1,2 @@
-export { AlertIcon } from './AlertIcon';
+export { AlertIcon } from "./AlertIcon";
+export { IdeaIcon } from "./IdeaIcon";

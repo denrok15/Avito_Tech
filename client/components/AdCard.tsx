@@ -194,12 +194,11 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
               pb: 2,
               minHeight: 118,
               fontFamily: '"Roboto", "Arial", sans-serif',
-              width: '100%',
               display: 'flex',
               flexDirection: 'column',
               flex: 1,
               gap: 0.5,
-              width: { lg: 200, xl: 220 },
+              width: { xs: '100%', lg: 200, xl: 220 },
             }}
           >
             <Box

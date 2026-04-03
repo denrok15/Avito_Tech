@@ -37,7 +37,15 @@ export const AiAssistantPanel = ({
   onApplyPrice,
 }: AiAssistantPanelProps) => {
   return (
-    <Card>
+    <Card
+      elevation={0}
+      sx={{
+        boxShadow: 'none',
+        border: '1px solid #F0F0F0',
+        borderRadius: '8px',
+        bgcolor: '#FFFFFF',
+      }}
+    >
       <CardContent>
         <Stack spacing={2}>
           <Typography variant="h6" sx={{ color: 'text.primary' }}>
