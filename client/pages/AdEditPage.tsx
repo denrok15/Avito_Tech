@@ -1,5 +1,5 @@
-import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import UndoRoundedIcon from "@mui/icons-material/UndoRounded";
 import {
   Alert,
   Box,
@@ -10,34 +10,36 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ValidationError } from 'yup';
+} from "@mui/material";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ValidationError } from "yup";
 import {
   adsKeyFactory,
   generateDescriptionSuggestion,
   generateMarketPriceSuggestion,
   loadAdByIdQuery,
   updateAdRequest,
-} from '@/api';
+} from "@/api";
 import {
   AiAssistantPanel,
   CategoryParamsFields,
-  MissingFieldsAlert,
   PageState,
-} from '@/components';
-import { useAbortController } from '@/hooks';
-import { CATEGORY_OPTIONS, CATEGORY_PARAM_FIELDS, STORAGE_KEYS } from '@/shared/consts';
-import type { Item, ItemCategory, ItemUpdateIn } from '@/shared/types';
+} from "@/components";
+import { useAbortController } from "@/hooks";
+import {
+  CATEGORY_OPTIONS,
+  CATEGORY_PARAM_FIELDS,
+  STORAGE_KEYS,
+} from "@/shared/consts";
+import type { Item, ItemCategory, ItemUpdateIn } from "@/shared/types";
 import {
   extractErrorMessage,
-  getMissingFields,
   isAbortError,
   itemFormSchema,
   toNumber,
-} from '@/utils';
+} from "@/utils";
 
 type FormState = {
   category: ItemCategory;
@@ -50,25 +52,28 @@ type FormState = {
 const itemToFormState = (item: Item): FormState => ({
   category: item.category,
   title: item.title,
-  price: item.price == null ? '' : String(item.price),
-  description: item.description ?? '',
+  price: item.price == null ? "" : String(item.price),
+  description: item.description ?? "",
   params: Object.fromEntries(
-    Object.entries(item.params ?? {}).map(([key, value]) => [key, value == null ? '' : String(value)]),
+    Object.entries(item.params ?? {}).map(([key, value]) => [
+      key,
+      value == null ? "" : String(value),
+    ]),
   ),
 });
 
 const normalizeParams = (
   category: ItemCategory,
   params: Record<string, string>,
-): ItemUpdateIn['params'] => {
+): ItemUpdateIn["params"] => {
   const fields = CATEGORY_PARAM_FIELDS[category];
   const normalized: Record<string, string | number> = {};
 
   for (const field of fields) {
-    const rawValue = (params[field.key] ?? '').trim();
+    const rawValue = (params[field.key] ?? "").trim();
     if (!rawValue) continue;
 
-    if (field.type === 'number') {
+    if (field.type === "number") {
       const numericValue = toNumber(rawValue);
       if (numericValue != null) normalized[field.key] = numericValue;
       continue;
@@ -77,7 +82,7 @@ const normalizeParams = (
     normalized[field.key] = rawValue;
   }
 
-  return normalized as ItemUpdateIn['params'];
+  return normalized as ItemUpdateIn["params"];
 };
 
 export const AdEditPage = () => {
@@ -89,12 +94,14 @@ export const AdEditPage = () => {
   const adQuery = useQuery(loadAdByIdQuery(id));
 
   const [form, setForm] = useState<FormState | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [generatedDescription, setGeneratedDescription] = useState('');
+  const [generatedDescription, setGeneratedDescription] = useState("");
   const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isGeneratingPrice, setIsGeneratingPrice] = useState(false);
@@ -103,11 +110,6 @@ export const AdEditPage = () => {
   const saveAbort = useAbortController();
   const descAbort = useAbortController();
   const priceAbort = useAbortController();
-
-  const missingFields = useMemo(
-    () => (adQuery.data ? getMissingFields(adQuery.data) : []),
-    [adQuery.data],
-  );
 
   useEffect(() => {
     if (!adQuery.data || form) return;
@@ -144,7 +146,9 @@ export const AdEditPage = () => {
   }
 
   if (adQuery.isError && !adQuery.data) {
-    return <PageState error={adQuery.error} onRetry={() => adQuery.refetch()} />;
+    return (
+      <PageState error={adQuery.error} onRetry={() => adQuery.refetch()} />
+    );
   }
 
   if (!adQuery.data || !form) {
@@ -159,11 +163,14 @@ export const AdEditPage = () => {
     params: normalizeParams(form.category, form.params),
   } as const;
 
-  const setField = (name: keyof FormState, value: string | Record<string, string>) => {
-    setValidationErrors(current => ({ ...current, [name]: '' }));
+  const setField = (
+    name: keyof FormState,
+    value: string | Record<string, string>,
+  ) => {
+    setValidationErrors((current) => ({ ...current, [name]: "" }));
     setSubmitError(null);
 
-    setForm(current => {
+    setForm((current) => {
       if (!current) return current;
 
       return {
@@ -174,7 +181,7 @@ export const AdEditPage = () => {
   };
 
   const setParamField = (name: string, value: string) => {
-    setForm(current => {
+    setForm((current) => {
       if (!current) return current;
       return {
         ...current,
@@ -193,7 +200,10 @@ export const AdEditPage = () => {
     const controller = descAbort.nextController();
 
     try {
-      const response = await generateDescriptionSuggestion(aiContext, controller.signal);
+      const response = await generateDescriptionSuggestion(
+        aiContext,
+        controller.signal,
+      );
       setGeneratedDescription(response);
     } catch (error) {
       if (isAbortError(error)) return;
@@ -210,7 +220,10 @@ export const AdEditPage = () => {
     const controller = priceAbort.nextController();
 
     try {
-      const response = await generateMarketPriceSuggestion(aiContext, controller.signal);
+      const response = await generateMarketPriceSuggestion(
+        aiContext,
+        controller.signal,
+      );
       setSuggestedPrice(response.price);
     } catch (error) {
       if (isAbortError(error)) return;
@@ -280,8 +293,22 @@ export const AdEditPage = () => {
 
   return (
     <Stack spacing={2}>
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} justifyContent="space-between">
-        <Typography variant="h5">Редактирование объявления</Typography>
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={1}
+        justifyContent="space-between"
+      >
+        <Typography
+          sx={{
+            fontFamily: "Roboto, sans-serif",
+            fontSize: 30,
+            fontWeight: 500,
+            color: "#000000D9",
+            lineHeight: "40px",
+          }}
+        >
+          Редактирование объявления
+        </Typography>
 
         <Stack direction="row" spacing={1}>
           <Button
@@ -299,22 +326,22 @@ export const AdEditPage = () => {
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? 'Сохранение...' : 'Сохранить'}
+            {isSaving ? "Сохранение..." : "Сохранить"}
           </Button>
         </Stack>
       </Stack>
 
-      {draftRestored ? <Alert severity="info">Черновик восстановлен из localStorage.</Alert> : null}
-
-      {missingFields.length ? <MissingFieldsAlert fields={missingFields} /> : null}
+      {draftRestored ? (
+        <Alert severity="info">Черновик восстановлен</Alert>
+      ) : null}
 
       {submitError ? <Alert severity="error">{submitError}</Alert> : null}
 
       <Box
         sx={{
-          display: 'grid',
+          display: "grid",
           gap: 2,
-          gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 360px' },
+          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 360px" },
         }}
       >
         <Card>
@@ -324,16 +351,16 @@ export const AdEditPage = () => {
                 select
                 label="Категория"
                 value={form.category}
-                onChange={event => {
+                onChange={(event) => {
                   const nextCategory = event.target.value as ItemCategory;
-                  setField('category', nextCategory);
-                  setField('params', {});
+                  setField("category", nextCategory);
+                  setField("params", {});
                 }}
                 error={Boolean(validationErrors.category)}
                 helperText={validationErrors.category}
                 fullWidth
               >
-                {CATEGORY_OPTIONS.map(option => (
+                {CATEGORY_OPTIONS.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
                   </MenuItem>
@@ -343,7 +370,7 @@ export const AdEditPage = () => {
               <TextField
                 label="Название"
                 value={form.title}
-                onChange={event => setField('title', event.target.value)}
+                onChange={(event) => setField("title", event.target.value)}
                 error={Boolean(validationErrors.title)}
                 helperText={validationErrors.title}
                 fullWidth
@@ -353,7 +380,7 @@ export const AdEditPage = () => {
                 label="Цена"
                 type="number"
                 value={form.price}
-                onChange={event => setField('price', event.target.value)}
+                onChange={(event) => setField("price", event.target.value)}
                 error={Boolean(validationErrors.price)}
                 helperText={validationErrors.price}
                 fullWidth
@@ -361,16 +388,25 @@ export const AdEditPage = () => {
 
               <Typography variant="h6">Характеристики</Typography>
 
-              <CategoryParamsFields category={form.category} params={form.params} onChange={setParamField} />
+              <CategoryParamsFields
+                category={form.category}
+                params={form.params}
+                onChange={setParamField}
+              />
 
               <TextField
                 label="Описание"
                 multiline
                 minRows={6}
                 value={form.description}
-                onChange={event => setField('description', event.target.value)}
+                onChange={(event) =>
+                  setField("description", event.target.value)
+                }
                 error={Boolean(validationErrors.description)}
-                helperText={validationErrors.description ?? `${form.description.length}/3000 символов`}
+                helperText={
+                  validationErrors.description ??
+                  `${form.description.length}/3000 символов`
+                }
                 fullWidth
               />
             </Stack>
@@ -386,13 +422,13 @@ export const AdEditPage = () => {
           aiError={aiError}
           onGenerateDescription={handleGenerateDescription}
           onApplyDescription={() => {
-            setField('description', generatedDescription);
-            setGeneratedDescription('');
+            setField("description", generatedDescription);
+            setGeneratedDescription("");
           }}
           onGeneratePrice={handleGeneratePrice}
           onApplyPrice={() => {
             if (suggestedPrice == null) return;
-            setField('price', String(suggestedPrice));
+            setField("price", String(suggestedPrice));
           }}
         />
       </Box>

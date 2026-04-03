@@ -140,7 +140,7 @@ export const AdsListPage = () => {
             value={query}
             sx={{
               "& .MuiOutlinedInput-root": {
-                backgroundColor: "#F7F5F8",
+                backgroundColor: "#F4F4F6",
                 borderRadius: 1,
                 "& fieldset": {
                   border: "none",
@@ -177,7 +177,7 @@ export const AdsListPage = () => {
               px: 0.5,
               py: 0.25,
               borderRadius: "8px",
-              bgcolor: "#f7f5f8",
+              bgcolor: "#F4F4F6",
             }}
           >
             <IconButton
@@ -228,7 +228,6 @@ export const AdsListPage = () => {
               height: 40,
               p: "0px",
               borderRadius: "8px",
-              bgcolor: "#F7F5F8",
               flexShrink: 0,
             }}
           >
@@ -246,7 +245,7 @@ export const AdsListPage = () => {
                 "& .MuiOutlinedInput-root": {
                   height: "100%",
                   borderRadius: "8px",
-                  bgcolor: "#ffffff",
+                  bgcolor: "#F4F4F6",
                   "& fieldset": {
                     border: "none",
                   },
@@ -342,7 +341,11 @@ export const AdsListPage = () => {
             <Alert
               severity="error"
               action={
-                <Button size="small" color="inherit" onClick={() => adsQuery.refetch()}>
+                <Button
+                  size="small"
+                  color="inherit"
+                  onClick={() => adsQuery.refetch()}
+                >
                   Повторить
                 </Button>
               }
