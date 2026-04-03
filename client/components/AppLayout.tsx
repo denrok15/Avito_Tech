@@ -1,15 +1,16 @@
-import { Box, Container } from '@mui/material';
-import { Outlet } from 'react-router-dom';
+import { Box, Container } from "@mui/material";
+import { Outlet } from "react-router-dom";
 
 export const AppLayout = () => (
-  <Box sx={{ minHeight: '100vh', pb: 10 }}>
+  <Box sx={{ minHeight: "100vh", pb: 10 }}>
     <Container
       maxWidth={false}
+      disableGutters
       sx={{
-        mt: 6,
-        width: '100%',
-        maxWidth: 1240,
-        px: { xs: 2, sm: 3 },
+        mt: 3,
+        width: "100%",
+        maxWidth: "none",
+        px: { xs: 2, sm: 3, lg: 4 },
       }}
     >
       <Outlet />

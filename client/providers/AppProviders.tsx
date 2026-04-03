@@ -24,6 +24,10 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
           primary: {
             main: '#1d4ed8',
           },
+          background: {
+            default: mode === 'dark' ? '#0f172a' : '#F7F5F8',
+            paper: mode === 'dark' ? '#111827' : '#ffffff',
+          },
         },
         shape: {
           borderRadius: 12,
