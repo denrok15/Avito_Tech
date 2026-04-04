@@ -493,7 +493,14 @@ export const AdEditPage = () => {
               htmlFor="ad-category"
               sx={MAIN_LABEL_SX}
             >
-              <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
                 <Asterisk />
                 Категория
               </Box>
@@ -534,7 +541,14 @@ export const AdEditPage = () => {
 
           <Stack spacing={0.5}>
             <Typography component="label" htmlFor="ad-title" sx={MAIN_LABEL_SX}>
-              <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
                 <Asterisk />
                 Название
               </Box>
@@ -548,7 +562,8 @@ export const AdEditPage = () => {
               error={false}
               helperText={
                 showTitleDanger
-                  ? fieldErrors.title ?? "РќР°Р·РІР°РЅРёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ"
+                  ? (fieldErrors.title ??
+                    "РќР°Р·РІР°РЅРёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ")
                   : undefined
               }
               FormHelperTextProps={{
@@ -592,7 +607,14 @@ export const AdEditPage = () => {
 
           <Stack spacing={0.5}>
             <Typography component="label" htmlFor="ad-price" sx={MAIN_LABEL_SX}>
-              <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
                 <Asterisk />
                 Цена
               </Box>
@@ -682,11 +704,7 @@ export const AdEditPage = () => {
                   },
                 }}
                 startIcon={
-                  isGeneratingPrice ? (
-                    <RestartAltRoundedIcon />
-                  ) : (
-                    <IdeaIcon />
-                  )
+                  isGeneratingPrice ? <RestartAltRoundedIcon /> : <IdeaIcon />
                 }
               >
                 {isGeneratingPrice
@@ -745,7 +763,7 @@ export const AdEditPage = () => {
                       component="ul"
                       sx={{
                         m: 0,
-                        pl: "16px",
+                        pl: "0px",
                         fontFamily: "Roboto, system-ui, sans-serif",
                         fontWeight: 400,
                         fontSize: 12,
@@ -753,9 +771,20 @@ export const AdEditPage = () => {
                         color: "#000000D9",
                       }}
                     >
-                      <li>
+                      <Typography
+                        sx={{
+                          fontFamily: "Roboto, system-ui, sans-serif",
+                          fontWeight: 500,
+                          fontSize: 12,
+                          lineHeight: "16px",
+                          color: "#1E1E1E",
+                        }}
+                      >
+                        Ответ от AI:
+                      </Typography>
+                      <div style={{ marginTop: 4 }}>
                         {`Средняя цена: ${suggestedPrice.toLocaleString("ru-RU")} ₽`}
-                      </li>
+                      </div>
                     </Box>
                   ) : (
                     <Typography
@@ -794,7 +823,10 @@ export const AdEditPage = () => {
                           textAlign: "center",
                           textTransform: "none",
                           boxShadow: "0px 2px 0px 0px #0000000B",
-                          "&:hover": { bgcolor: "#1677ff", boxShadow: "0px 2px 0px 0px #0000000B" },
+                          "&:hover": {
+                            bgcolor: "#1677ff",
+                            boxShadow: "0px 2px 0px 0px #0000000B",
+                          },
                         }}
                       >
                         Применить
@@ -963,11 +995,17 @@ export const AdEditPage = () => {
                           anchorEl={descriptionButtonRef.current}
                           onClose={() => {}}
                           anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                          transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+                          transformOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                          }}
                           disableAutoFocus
                           disableEnforceFocus
                           PaperProps={{
                             sx: {
+                              backgroundColor: descriptionError
+                                ? "#FEE9E7"
+                                : "#FFFFFF",
                               p: "8px",
                               borderRadius: "2px",
                               border: `1px solid ${BORDER_COLOR}`,
@@ -977,17 +1015,19 @@ export const AdEditPage = () => {
                           }}
                         >
                           <Stack spacing={1}>
-                            <Typography
-                              sx={{
-                                fontFamily: "Roboto, system-ui, sans-serif",
-                                fontWeight: 500,
-                                fontSize: 12,
-                                lineHeight: "16px",
-                                color: "#1E1E1E",
-                              }}
-                            >
-                              Ответ от AI:
-                            </Typography>
+                            {!descriptionError && (
+                              <Typography
+                                sx={{
+                                  fontFamily: "Roboto, system-ui, sans-serif",
+                                  fontWeight: 500,
+                                  fontSize: 12,
+                                  lineHeight: "16px",
+                                  color: "#1E1E1E",
+                                }}
+                              >
+                                Ответ от AI:
+                              </Typography>
+                            )}
                             <Typography
                               sx={{
                                 fontFamily: "Roboto, system-ui, sans-serif",
@@ -998,16 +1038,47 @@ export const AdEditPage = () => {
                                 whiteSpace: "pre-wrap",
                               }}
                             >
-                              {descriptionError
-                                ? descriptionError
-                                : generatedDescription || "Нет данных"}
+                              {descriptionError ? (
+                                <Stack spacing={0.5}>
+                                  <Typography
+                                    sx={{
+                                      fontFamily:
+                                        "Roboto, system-ui, sans-serif",
+                                      fontWeight: 500,
+                                      fontSize: 12,
+                                      lineHeight: "16px",
+                                      color: "#C00F0C",
+                                    }}
+                                  >
+                                    Произошла ошибка при запросе к AI
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      fontFamily:
+                                        "Roboto, system-ui, sans-serif",
+                                      fontWeight: 400,
+                                      fontSize: 12,
+                                      lineHeight: "16px",
+                                      color: "#1E1E1E",
+                                    }}
+                                  >
+                                    Попробуйте повторить запрос или закройте
+                                    уведомление
+                                  </Typography>
+                                </Stack>
+                              ) : (
+                                generatedDescription || "Нет данных"
+                              )}
                             </Typography>
                             <Stack direction="row" spacing={1}>
                               {generatedDescription ? (
                                 <Button
                                   type="button"
                                   onClick={() => {
-                                    setField("description", generatedDescription);
+                                    setField(
+                                      "description",
+                                      generatedDescription,
+                                    );
                                     setGeneratedDescription("");
                                     setDescriptionTooltipOpen(false);
                                   }}
@@ -1057,7 +1128,9 @@ export const AdEditPage = () => {
                                   textTransform: "none",
                                   boxShadow: "0px 2px 0px 0px #00000004",
                                   "&:hover": {
-                                    bgcolor: "#FFFFFF",
+                                    bgcolor: descriptionError
+                                      ? "#FCB3AD"
+                                      : "#FFFFFF",
                                     boxShadow: "0px 2px 0px 0px #00000004",
                                   },
                                 }}
@@ -1249,7 +1322,9 @@ export const AdEditPage = () => {
               gap: "6px",
             }}
           >
-            <CancelRoundedIcon sx={{ fontSize: 18, color: "#C00F0C", mt: "2px" }} />
+            <CancelRoundedIcon
+              sx={{ fontSize: 18, color: "#C00F0C", mt: "2px" }}
+            />
             <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <Typography
                 sx={{
@@ -1271,8 +1346,8 @@ export const AdEditPage = () => {
                   color: "#1E1E1E",
                 }}
               >
-                При попытке сохранить изменения произошла ошибка. Попробуйте ещё раз
-                или зайдите позже.
+                При попытке сохранить изменения произошла ошибка. Попробуйте ещё
+                раз или зайдите позже.
               </Typography>
             </Box>
           </Box>
