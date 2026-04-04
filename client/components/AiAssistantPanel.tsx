@@ -1,5 +1,5 @@
-import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
-import SellRoundedIcon from '@mui/icons-material/SellRounded';
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import SellRoundedIcon from "@mui/icons-material/SellRounded";
 import {
   Alert,
   Button,
@@ -9,7 +9,7 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 type AiAssistantPanelProps = {
   hasDescription: boolean;
@@ -40,27 +40,31 @@ export const AiAssistantPanel = ({
     <Card
       elevation={0}
       sx={{
-        boxShadow: 'none',
-        border: '1px solid #F0F0F0',
-        borderRadius: '8px',
-        bgcolor: '#FFFFFF',
+        boxShadow: "none",
+        border: "1px solid #F0F0F0",
+        borderRadius: "8px",
+        bgcolor: "#FFFFFF",
       }}
     >
       <CardContent>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ color: 'text.primary' }}>
+          <Typography variant="h6" sx={{ color: "text.primary" }}>
             AI-ассистент
           </Typography>
 
           <Button
             variant="contained"
             startIcon={
-              isGeneratingDescription ? <CircularProgress color="inherit" size={16} /> : <AutoAwesomeRoundedIcon />
+              isGeneratingDescription ? (
+                <CircularProgress color="inherit" size={16} />
+              ) : (
+                <AutoAwesomeRoundedIcon />
+              )
             }
             onClick={onGenerateDescription}
             disabled={isGeneratingDescription}
           >
-            {hasDescription ? 'Улучшить описание' : 'Придумать описание'}
+            {hasDescription ? "Улучшить описание" : "Придумать описание"}
           </Button>
 
           {generatedDescription ? (
@@ -81,7 +85,13 @@ export const AiAssistantPanel = ({
           <Button
             variant="contained"
             color="secondary"
-            startIcon={isGeneratingPrice ? <CircularProgress color="inherit" size={16} /> : <SellRoundedIcon />}
+            startIcon={
+              isGeneratingPrice ? (
+                <CircularProgress color="inherit" size={16} />
+              ) : (
+                <SellRoundedIcon />
+              )
+            }
             onClick={onGeneratePrice}
             disabled={isGeneratingPrice}
           >
@@ -90,7 +100,9 @@ export const AiAssistantPanel = ({
 
           {suggestedPrice ? (
             <Stack spacing={1}>
-              <Alert severity="info">Рекомендованная цена: {suggestedPrice.toLocaleString('ru-RU')} ₽</Alert>
+              <Alert severity="info">
+                Рекомендованная цена: {suggestedPrice.toLocaleString("ru-RU")} ₽
+              </Alert>
               <Button variant="outlined" onClick={onApplyPrice}>
                 Применить цену
               </Button>
