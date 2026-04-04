@@ -28,6 +28,7 @@ const INPUT_SX = {
     fontSize: 14,
     '& .MuiOutlinedInput-notchedOutline': {
       borderWidth: 1,
+      borderColor: '#D9D9D9',
     },
     '& .MuiOutlinedInput-input': {
       py: '5px',
@@ -60,9 +61,6 @@ export const CategoryParamsFields = ({
     <Stack spacing={2}>
       {fields.map(field => {
         const value = params[field.key] ?? '';
-        const isEmpty = !String(value).trim();
-        const showWarning = isEmpty;
-
         const endAdornment =
           field.type !== 'select' && value ? (
             <InputAdornment position="end" sx={{ mr: 0.5 }}>
@@ -103,13 +101,13 @@ export const CategoryParamsFields = ({
               sx={{
                 ...INPUT_SX,
                 '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-                  borderColor: showWarning ? '#FFA940' : 'rgba(0, 0, 0, 0.23)',
+                  borderColor: '#D9D9D9',
                 },
                 '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: showWarning ? '#FFA940' : undefined,
+                  borderColor: '#D9D9D9',
                 },
                 '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: showWarning ? '#FFA940' : undefined,
+                  borderColor: '#D9D9D9',
                   borderWidth: 1,
                 },
               }}

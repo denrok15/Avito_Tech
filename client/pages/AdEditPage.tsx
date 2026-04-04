@@ -6,13 +6,14 @@ import {
   IconButton,
   InputAdornment,
   MenuItem,
+  Popover,
   Snackbar,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "yup";
 import {
@@ -22,12 +23,9 @@ import {
   loadAdByIdQuery,
   updateAdRequest,
 } from "@/api";
-import {
-  AiAssistantPanel,
-  CategoryParamsFields,
-  PageState,
-} from "@/components";
+import { CategoryParamsFields, PageState } from "@/components";
 import { useAbortController } from "@/hooks";
+import { IdeaIcon } from "@/icons";
 import {
   CATEGORY_OPTIONS,
   CATEGORY_PARAM_FIELDS,
@@ -42,6 +40,10 @@ import {
 } from "@/utils";
 
 const DESCRIPTION_MAX = 3000;
+const BORDER_COLOR = "#D9D9D9";
+const ERROR_COLOR = "#EC221F";
+const ACTION_BG = "#F9F1E6";
+const ACTION_TEXT = "#FFA940";
 
 const MAIN_LABEL_SX = {
   fontFamily: '"Inter", system-ui, sans-serif',
@@ -62,6 +64,7 @@ const FIELD_STD_SX = {
     fontSize: 14,
     "& .MuiOutlinedInput-notchedOutline": {
       borderWidth: 1,
+      borderColor: BORDER_COLOR,
     },
     "& .MuiOutlinedInput-input": {
       py: "5px",
@@ -81,6 +84,7 @@ const CATEGORY_FIELD_SX = {
     fontSize: 14,
     "& .MuiOutlinedInput-notchedOutline": {
       borderWidth: 1,
+      borderColor: BORDER_COLOR,
     },
     "& .MuiOutlinedInput-input": {
       py: "4px",
@@ -92,7 +96,7 @@ const CATEGORY_FIELD_SX = {
 } as const;
 
 const Asterisk = () => (
-  <Box component="span" sx={{ color: "#EC221F", ml: 0.25 }}>
+  <Box component="span" sx={{ color: ERROR_COLOR, ml: 0.25 }}>
     *
   </Box>
 );
@@ -181,12 +185,14 @@ export const AdEditPage = () => {
   });
   const [draftRestored, setDraftRestored] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [priceTooltipOpen, setPriceTooltipOpen] = useState(false);
 
   const [generatedDescription, setGeneratedDescription] = useState("");
   const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isGeneratingPrice, setIsGeneratingPrice] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const priceButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -232,16 +238,14 @@ export const AdEditPage = () => {
     return titleOk && priceOk && descLen;
   }, [form]);
 
-  const showTitleDanger = Boolean(fieldErrors.title && touched.title);
+  const titleRequired = !form?.title.trim();
+  const showTitleDanger = Boolean(
+    (fieldErrors.title && touched.title) || titleRequired,
+  );
   const showPriceDanger = Boolean(fieldErrors.price && touched.price);
 
-  const titleBorder = showTitleDanger ? "#EC221F" : "rgba(0, 0, 0, 0.23)";
-  const priceBorder = showPriceDanger ? "#EC221F" : "rgba(0, 0, 0, 0.23)";
-
-  const descriptionEmptyWarning = !form?.description.trim();
-  const descriptionBorder = descriptionEmptyWarning
-    ? "#FFA940"
-    : "rgba(0, 0, 0, 0.23)";
+  const titleBorder = showTitleDanger ? ERROR_COLOR : BORDER_COLOR;
+  const priceBorder = showPriceDanger ? ERROR_COLOR : BORDER_COLOR;
 
   const runTitleBlur = useCallback(() => {
     if (!form) return;
@@ -343,7 +347,9 @@ export const AdEditPage = () => {
 
   const handleGeneratePrice = async () => {
     setAiError(null);
+    setSuggestedPrice(null);
     setIsGeneratingPrice(true);
+    setPriceTooltipOpen(true);
 
     const controller = priceAbort.nextController();
 
@@ -441,12 +447,20 @@ export const AdEditPage = () => {
     <Box
       sx={{
         bgcolor: "#FFFFFF",
-        minHeight: "100%",
+        minHeight: "100vh",
         width: "100%",
         pb: 4,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "fixed",
+          inset: 0,
+          bgcolor: "#FFFFFF",
+          zIndex: -1,
+        },
       }}
     >
-      <Stack spacing={3} sx={{ maxWidth: 456, width: "100%" }}>
+      <Stack spacing={3} sx={{ maxWidth: 942, width: "100%" }}>
         <Typography
           sx={{
             fontFamily: "Roboto, system-ui, sans-serif",
@@ -488,8 +502,17 @@ export const AdEditPage = () => {
               sx={{
                 ...CATEGORY_FIELD_SX,
                 "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(0, 0, 0, 0.23)",
+                  borderColor: BORDER_COLOR,
                 },
+                "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: BORDER_COLOR,
+                  },
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: BORDER_COLOR,
+                    borderWidth: 1,
+                  },
               }}
             >
               {CATEGORY_OPTIONS.map((option) => (
@@ -512,9 +535,13 @@ export const AdEditPage = () => {
               onChange={(event) => setField("title", event.target.value)}
               onBlur={runTitleBlur}
               error={false}
-              helperText={showTitleDanger ? fieldErrors.title : undefined}
+              helperText={
+                showTitleDanger
+                  ? fieldErrors.title ?? "РќР°Р·РІР°РЅРёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ"
+                  : undefined
+              }
               FormHelperTextProps={{
-                sx: { mx: 0, color: "#EC221F", fontSize: 12 },
+                sx: { mx: 0, color: ERROR_COLOR, fontSize: 12 },
               }}
               sx={{
                 ...FIELD_STD_SX,
@@ -527,7 +554,7 @@ export const AdEditPage = () => {
                   },
                 "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
-                    borderColor: showTitleDanger ? "#EC221F" : undefined,
+                    borderColor: titleBorder,
                     borderWidth: 1,
                   },
               }}
@@ -557,62 +584,185 @@ export const AdEditPage = () => {
               Цена
               <Asterisk />
             </Typography>
-            <TextField
-              id="ad-price"
-              hiddenLabel
-              type="number"
-              value={form.price}
-              onChange={(event) => setField("price", event.target.value)}
-              onBlur={runPriceBlur}
-              error={false}
-              helperText={
-                showPriceDanger
-                  ? fieldErrors.price
-                  : suggestedPrice != null
-                    ? `Предложение AI: ${suggestedPrice.toLocaleString("ru-RU")} ₽`
-                    : undefined
-              }
-              FormHelperTextProps={{
-                sx: {
-                  mx: 0,
-                  color: showPriceDanger ? "#EC221F" : "text.secondary",
-                  fontSize: 12,
-                },
-              }}
-              sx={{
-                ...FIELD_STD_SX,
-                "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-                  borderColor: priceBorder,
-                },
-                "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
-                  {
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                id="ad-price"
+                hiddenLabel
+                type="number"
+                value={form.price}
+                onChange={(event) => setField("price", event.target.value)}
+                onBlur={runPriceBlur}
+                error={false}
+                helperText={showPriceDanger ? fieldErrors.price : undefined}
+                FormHelperTextProps={{
+                  sx: {
+                    mx: 0,
+                    color: showPriceDanger ? ERROR_COLOR : "text.secondary",
+                    fontSize: 12,
+                  },
+                }}
+                sx={{
+                  ...FIELD_STD_SX,
+                  flex: 1,
+                  "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                     borderColor: priceBorder,
                   },
-                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                  {
-                    borderColor: showPriceDanger ? "#EC221F" : undefined,
-                    borderWidth: 1,
+                  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
+                    {
+                      borderColor: priceBorder,
+                    },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                    {
+                      borderColor: priceBorder,
+                      borderWidth: 1,
+                    },
+                }}
+                slotProps={{
+                  input: {
+                    "aria-invalid": showPriceDanger,
+                    endAdornment: form.price ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          aria-label="Очистить"
+                          onClick={() => setField("price", "")}
+                          sx={{ p: 0.25 }}
+                        >
+                          <ClearRoundedIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : undefined,
                   },
-              }}
-              slotProps={{
-                input: {
-                  "aria-invalid": showPriceDanger,
-                  endAdornment: form.price ? (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        edge="end"
-                        aria-label="Очистить"
-                        onClick={() => setField("price", "")}
-                        sx={{ p: 0.25 }}
+                }}
+              />
+              <Button
+                type="button"
+                ref={priceButtonRef}
+                onClick={handleGeneratePrice}
+                disabled={isGeneratingPrice}
+                sx={{
+                  minWidth: 175,
+                  width: 175,
+                  height: 32,
+                  borderRadius: "8px",
+                  px: "7px",
+                  gap: "10px",
+                  bgcolor: ACTION_BG,
+                  color: ACTION_TEXT,
+                  fontFamily: "Roboto, system-ui, sans-serif",
+                  fontWeight: 400,
+                  fontSize: 14,
+                  lineHeight: "22px",
+                  textAlign: "center",
+                  textTransform: "none",
+                  boxShadow: "none",
+                  "&:hover": {
+                    bgcolor: "#f3e6d6",
+                    boxShadow: "none",
+                  },
+                  "&.Mui-disabled": {
+                    bgcolor: ACTION_BG,
+                    color: ACTION_TEXT,
+                    opacity: 0.6,
+                  },
+                }}
+                startIcon={<IdeaIcon />}
+              >
+                {isGeneratingPrice
+                  ? "Выполняется запрос"
+                  : suggestedPrice != null || aiError
+                    ? "Повторить запрос"
+                    : "Узнать рыночную цену"}
+              </Button>
+              <Popover
+                open={priceTooltipOpen}
+                anchorEl={priceButtonRef.current}
+                onClose={() => {}}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                disableAutoFocus
+                disableEnforceFocus
+                PaperProps={{
+                  sx: {
+                    p: 2,
+                    borderRadius: "8px",
+                    border: `1px solid ${BORDER_COLOR}`,
+                    boxShadow: "none",
+                    maxWidth: 280,
+                  },
+                }}
+              >
+                <Stack spacing={1.5}>
+                  <Typography
+                    sx={{
+                      fontFamily: "Roboto, system-ui, sans-serif",
+                      fontWeight: 400,
+                      fontSize: 14,
+                      lineHeight: "22px",
+                      color: "#000000D9",
+                    }}
+                  >
+                    {isGeneratingPrice
+                      ? "Выполняется запрос"
+                      : aiError
+                        ? aiError
+                        : suggestedPrice != null
+                          ? `Средняя цена: ${suggestedPrice.toLocaleString("ru-RU")} ₽`
+                          : "Нет данных"}
+                  </Typography>
+                  <Stack direction="row" spacing={1}>
+                    {suggestedPrice != null ? (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setField("price", String(suggestedPrice));
+                          setPriceTooltipOpen(false);
+                        }}
+                        sx={{
+                          minWidth: 0,
+                          px: 1.5,
+                          height: 28,
+                          borderRadius: "6px",
+                          bgcolor: "#1890FF",
+                          color: "#FFFFFF",
+                          fontFamily: "Roboto, system-ui, sans-serif",
+                          fontWeight: 400,
+                          fontSize: 13,
+                          lineHeight: "20px",
+                          textTransform: "none",
+                          boxShadow: "none",
+                          "&:hover": { bgcolor: "#1677ff", boxShadow: "none" },
+                        }}
                       >
-                        <ClearRoundedIcon sx={{ fontSize: 18 }} />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : undefined,
-                },
-              }}
-            />
+                        Применить
+                      </Button>
+                    ) : null}
+                    <Button
+                      type="button"
+                      onClick={() => setPriceTooltipOpen(false)}
+                      sx={{
+                        minWidth: 0,
+                        px: 1.5,
+                        height: 28,
+                        borderRadius: "6px",
+                        bgcolor: "#F5F5F5",
+                        color: "#5A5A5A",
+                        fontFamily: "Roboto, system-ui, sans-serif",
+                        fontWeight: 400,
+                        fontSize: 13,
+                        lineHeight: "20px",
+                        textTransform: "none",
+                        boxShadow: "none",
+                        "&:hover": { bgcolor: "#ededed", boxShadow: "none" },
+                      }}
+                    >
+                      Закрыть
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Popover>
+            </Stack>
           </Stack>
 
           <Typography
@@ -649,7 +799,7 @@ export const AdEditPage = () => {
             >
               Описание
             </Typography>
-            <Box sx={{ position: "relative", width: "100%", maxWidth: 456 }}>
+            <Box sx={{ position: "relative", width: "100%", maxWidth: 942 }}>
               {form.description ? (
                 <IconButton
                   aria-label="Очистить описание"
@@ -670,7 +820,7 @@ export const AdEditPage = () => {
                 id="ad-description"
                 hiddenLabel
                 multiline
-                minRows={6}
+                minRows={2}
                 value={form.description}
                 onChange={(event) => {
                   const next = event.target.value;
@@ -707,55 +857,122 @@ export const AdEditPage = () => {
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
                     fontSize: 14,
+                    minHeight: 60,
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderWidth: 1,
                       borderColor: fieldErrors.description
-                        ? "#EC221F"
-                        : descriptionBorder,
+                        ? ERROR_COLOR
+                        : BORDER_COLOR,
                     },
                     "&:hover .MuiOutlinedInput-notchedOutline": {
                       borderColor: fieldErrors.description
-                        ? "#EC221F"
-                        : descriptionBorder,
+                        ? ERROR_COLOR
+                        : BORDER_COLOR,
                     },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                       borderColor: fieldErrors.description
-                        ? "#EC221F"
-                        : descriptionBorder,
+                        ? ERROR_COLOR
+                        : BORDER_COLOR,
                       borderWidth: 1,
                     },
                     "& .MuiOutlinedInput-input": {
-                      py: "5px",
-                      px: "12px",
+                      py: "8px",
+                      px: "16px",
                       paddingRight: form.description ? 40 : "12px",
                     },
                   },
                 }}
               />
             </Box>
+            <Button
+              type="button"
+              onClick={handleGenerateDescription}
+              disabled={isGeneratingDescription}
+              startIcon={<IdeaIcon />}
+              sx={{
+                alignSelf: "flex-start",
+                minWidth: 175,
+                width: 175,
+                height: 32,
+                borderRadius: "8px",
+                px: "7px",
+                gap: "10px",
+                bgcolor: ACTION_BG,
+                color: ACTION_TEXT,
+                fontFamily: "Roboto, system-ui, sans-serif",
+                fontWeight: 400,
+                fontSize: 14,
+                lineHeight: "22px",
+                textAlign: "center",
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": {
+                  bgcolor: "#f3e6d6",
+                  boxShadow: "none",
+                },
+                "&.Mui-disabled": {
+                  bgcolor: ACTION_BG,
+                  color: ACTION_TEXT,
+                  opacity: 0.6,
+                },
+              }}
+            >
+              {form.description.trim()
+                ? "Улучшить описание"
+                : "Придумать описание"}
+            </Button>
+            {generatedDescription ? (
+              <Stack spacing={1} sx={{ maxWidth: 942 }}>
+                <TextField
+                  multiline
+                  minRows={3}
+                  value={generatedDescription}
+                  hiddenLabel
+                  InputProps={{ readOnly: true }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      borderColor: BORDER_COLOR,
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: BORDER_COLOR,
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        py: "8px",
+                        px: "16px",
+                        fontSize: 14,
+                      },
+                    },
+                  }}
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setField("description", generatedDescription);
+                    setGeneratedDescription("");
+                  }}
+                  sx={{
+                    alignSelf: "flex-start",
+                    minWidth: 108,
+                    height: 32,
+                    borderRadius: "8px",
+                    px: "12px",
+                    bgcolor: "#1890FF",
+                    color: "#FFFFFF",
+                    fontFamily: "Roboto, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: 14,
+                    lineHeight: "22px",
+                    textTransform: "none",
+                    boxShadow: "none",
+                    "&:hover": { bgcolor: "#1677ff", boxShadow: "none" },
+                  }}
+                >
+                  Применить описание
+                </Button>
+              </Stack>
+            ) : null}
           </Stack>
         </Stack>
-
-        <Box sx={{ maxWidth: 456 }}>
-          <AiAssistantPanel
-            hasDescription={Boolean(form.description.trim())}
-            generatedDescription={generatedDescription}
-            suggestedPrice={suggestedPrice}
-            isGeneratingDescription={isGeneratingDescription}
-            isGeneratingPrice={isGeneratingPrice}
-            aiError={aiError}
-            onGenerateDescription={handleGenerateDescription}
-            onApplyDescription={() => {
-              setField("description", generatedDescription);
-              setGeneratedDescription("");
-            }}
-            onGeneratePrice={handleGeneratePrice}
-            onApplyPrice={() => {
-              if (suggestedPrice == null) return;
-              setField("price", String(suggestedPrice));
-            }}
-          />
-        </Box>
 
         <Stack
           direction="row"
@@ -775,8 +992,8 @@ export const AdEditPage = () => {
               py: "8px",
               px: "12px",
               gap: "8px",
-              bgcolor: "#F3F3F3",
-              color: "#000000D9",
+              bgcolor: "#1890FF",
+              color: "#FFFFFF",
               fontFamily: '"Inter", system-ui, sans-serif',
               fontWeight: 400,
               fontSize: 16,
@@ -784,7 +1001,7 @@ export const AdEditPage = () => {
               boxShadow: "none",
               border: "none",
               "&:hover": {
-                bgcolor: "#e8e8e8",
+                bgcolor: "#1677ff",
                 boxShadow: "none",
               },
               "&.Mui-disabled": {
