@@ -1,4 +1,5 @@
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
+import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
 import {
   Alert,
   Box,
@@ -186,13 +187,16 @@ export const AdEditPage = () => {
   const [draftRestored, setDraftRestored] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [priceTooltipOpen, setPriceTooltipOpen] = useState(false);
+  const [descriptionTooltipOpen, setDescriptionTooltipOpen] = useState(false);
 
   const [generatedDescription, setGeneratedDescription] = useState("");
   const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isGeneratingPrice, setIsGeneratingPrice] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const [priceError, setPriceError] = useState<string | null>(null);
   const priceButtonRef = useRef<HTMLButtonElement | null>(null);
+  const descriptionButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -326,7 +330,9 @@ export const AdEditPage = () => {
   };
 
   const handleGenerateDescription = async () => {
-    setAiError(null);
+    setDescriptionError(null);
+    setGeneratedDescription("");
+    setDescriptionTooltipOpen(false);
     setIsGeneratingDescription(true);
 
     const controller = descAbort.nextController();
@@ -337,19 +343,21 @@ export const AdEditPage = () => {
         controller.signal,
       );
       setGeneratedDescription(response);
+      setDescriptionTooltipOpen(true);
     } catch (error) {
       if (isAbortError(error)) return;
-      setAiError(extractErrorMessage(error));
+      setDescriptionError(extractErrorMessage(error));
+      setDescriptionTooltipOpen(true);
     } finally {
       setIsGeneratingDescription(false);
     }
   };
 
   const handleGeneratePrice = async () => {
-    setAiError(null);
+    setPriceError(null);
     setSuggestedPrice(null);
+    setPriceTooltipOpen(false);
     setIsGeneratingPrice(true);
-    setPriceTooltipOpen(true);
 
     const controller = priceAbort.nextController();
 
@@ -359,9 +367,11 @@ export const AdEditPage = () => {
         controller.signal,
       );
       setSuggestedPrice(response.price);
+      setPriceTooltipOpen(true);
     } catch (error) {
       if (isAbortError(error)) return;
-      setAiError(extractErrorMessage(error));
+      setPriceError(extractErrorMessage(error));
+      setPriceTooltipOpen(true);
     } finally {
       setIsGeneratingPrice(false);
     }
@@ -642,8 +652,8 @@ export const AdEditPage = () => {
                 onClick={handleGeneratePrice}
                 disabled={isGeneratingPrice}
                 sx={{
-                  minWidth: 175,
-                  width: 175,
+                  minWidth: 220,
+                  width: "auto",
                   height: 32,
                   borderRadius: "8px",
                   px: "7px",
@@ -657,6 +667,7 @@ export const AdEditPage = () => {
                   textAlign: "center",
                   textTransform: "none",
                   boxShadow: "none",
+                  whiteSpace: "nowrap",
                   "&:hover": {
                     bgcolor: "#f3e6d6",
                     boxShadow: "none",
@@ -667,11 +678,17 @@ export const AdEditPage = () => {
                     opacity: 0.6,
                   },
                 }}
-                startIcon={<IdeaIcon />}
+                startIcon={
+                  isGeneratingPrice ? (
+                    <RestartAltRoundedIcon />
+                  ) : (
+                    <IdeaIcon />
+                  )
+                }
               >
                 {isGeneratingPrice
                   ? "Выполняется запрос"
-                  : suggestedPrice != null || aiError
+                  : suggestedPrice != null || priceError
                     ? "Повторить запрос"
                     : "Узнать рыночную цену"}
               </Button>
@@ -679,38 +696,65 @@ export const AdEditPage = () => {
                 open={priceTooltipOpen}
                 anchorEl={priceButtonRef.current}
                 onClose={() => {}}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                transformOrigin={{ vertical: "bottom", horizontal: "left" }}
                 disableAutoFocus
                 disableEnforceFocus
                 PaperProps={{
                   sx: {
-                    p: 2,
-                    borderRadius: "8px",
+                    p: "8px",
+                    borderRadius: "2px",
                     border: `1px solid ${BORDER_COLOR}`,
-                    boxShadow: "none",
-                    maxWidth: 280,
+                    boxShadow: "0px 2px 8px 0px #00000026",
+                    width: 332,
+                    minHeight: 152,
                   },
                 }}
               >
-                <Stack spacing={1.5}>
+                <Stack spacing={1}>
                   <Typography
                     sx={{
                       fontFamily: "Roboto, system-ui, sans-serif",
-                      fontWeight: 400,
-                      fontSize: 14,
-                      lineHeight: "22px",
-                      color: "#000000D9",
+                      fontWeight: 500,
+                      fontSize: 12,
+                      lineHeight: "16px",
+                      color: "#1E1E1E",
                     }}
                   >
-                    {isGeneratingPrice
-                      ? "Выполняется запрос"
-                      : aiError
-                        ? aiError
-                        : suggestedPrice != null
-                          ? `Средняя цена: ${suggestedPrice.toLocaleString("ru-RU")} ₽`
-                          : "Нет данных"}
+                    Ответ от AI:
                   </Typography>
+                  {suggestedPrice != null || priceError ? (
+                    <Box
+                      component="ul"
+                      sx={{
+                        m: 0,
+                        pl: "16px",
+                        fontFamily: "Roboto, system-ui, sans-serif",
+                        fontWeight: 400,
+                        fontSize: 12,
+                        lineHeight: "16px",
+                        color: "#000000D9",
+                      }}
+                    >
+                      <li>
+                        {suggestedPrice != null
+                          ? `Средняя цена: ${suggestedPrice.toLocaleString("ru-RU")} ₽`
+                          : priceError}
+                      </li>
+                    </Box>
+                  ) : (
+                    <Typography
+                      sx={{
+                        fontFamily: "Roboto, system-ui, sans-serif",
+                        fontWeight: 400,
+                        fontSize: 12,
+                        lineHeight: "16px",
+                        color: "#000000D9",
+                      }}
+                    >
+                      Нет данных
+                    </Typography>
+                  )}
                   <Stack direction="row" spacing={1}>
                     {suggestedPrice != null ? (
                       <Button
@@ -720,19 +764,22 @@ export const AdEditPage = () => {
                           setPriceTooltipOpen(false);
                         }}
                         sx={{
-                          minWidth: 0,
-                          px: 1.5,
-                          height: 28,
-                          borderRadius: "6px",
+                          minWidth: 89,
+                          width: 89,
+                          height: 22,
+                          borderRadius: "4px",
+                          px: "7px",
+                          gap: "10px",
                           bgcolor: "#1890FF",
                           color: "#FFFFFF",
                           fontFamily: "Roboto, system-ui, sans-serif",
                           fontWeight: 400,
-                          fontSize: 13,
-                          lineHeight: "20px",
+                          fontSize: 14,
+                          lineHeight: "22px",
+                          textAlign: "center",
                           textTransform: "none",
-                          boxShadow: "none",
-                          "&:hover": { bgcolor: "#1677ff", boxShadow: "none" },
+                          boxShadow: "0px 2px 0px 0px #0000000B",
+                          "&:hover": { bgcolor: "#1677ff", boxShadow: "0px 2px 0px 0px #0000000B" },
                         }}
                       >
                         Применить
@@ -742,19 +789,23 @@ export const AdEditPage = () => {
                       type="button"
                       onClick={() => setPriceTooltipOpen(false)}
                       sx={{
-                        minWidth: 0,
-                        px: 1.5,
-                        height: 28,
-                        borderRadius: "6px",
-                        bgcolor: "#F5F5F5",
-                        color: "#5A5A5A",
+                        minWidth: 73,
+                        width: 73,
+                        height: 24,
+                        borderRadius: "4px",
+                        px: "7px",
+                        gap: "10px",
+                        bgcolor: "#FFFFFF",
+                        color: "#000000D9",
+                        border: `1px solid ${BORDER_COLOR}`,
                         fontFamily: "Roboto, system-ui, sans-serif",
                         fontWeight: 400,
-                        fontSize: 13,
-                        lineHeight: "20px",
+                        fontSize: 14,
+                        lineHeight: "22px",
+                        textAlign: "center",
                         textTransform: "none",
-                        boxShadow: "none",
-                        "&:hover": { bgcolor: "#ededed", boxShadow: "none" },
+                        boxShadow: "0px 2px 0px 0px #00000004",
+                        "&:hover": { bgcolor: "#FFFFFF", boxShadow: "0px 2px 0px 0px #00000004" },
                       }}
                     >
                       Закрыть
@@ -888,11 +939,18 @@ export const AdEditPage = () => {
               type="button"
               onClick={handleGenerateDescription}
               disabled={isGeneratingDescription}
-              startIcon={<IdeaIcon />}
+              ref={descriptionButtonRef}
+              startIcon={
+                isGeneratingDescription ? (
+                  <RestartAltRoundedIcon />
+                ) : (
+                  <IdeaIcon />
+                )
+              }
               sx={{
                 alignSelf: "flex-start",
-                minWidth: 175,
-                width: 175,
+                minWidth: 220,
+                width: "auto",
                 height: 32,
                 borderRadius: "8px",
                 px: "7px",
@@ -906,6 +964,7 @@ export const AdEditPage = () => {
                 textAlign: "center",
                 textTransform: "none",
                 boxShadow: "none",
+                whiteSpace: "nowrap",
                 "&:hover": {
                   bgcolor: "#f3e6d6",
                   boxShadow: "none",
@@ -917,60 +976,124 @@ export const AdEditPage = () => {
                 },
               }}
             >
-              {form.description.trim()
-                ? "Улучшить описание"
-                : "Придумать описание"}
+              {isGeneratingDescription
+                ? "Выполняется запрос"
+                : generatedDescription || descriptionError
+                  ? "Повторить запрос"
+                  : form.description.trim()
+                    ? "Улучшить описание"
+                    : "Придумать описание"}
             </Button>
-            {generatedDescription ? (
-              <Stack spacing={1} sx={{ maxWidth: 942 }}>
-                <TextField
-                  multiline
-                  minRows={3}
-                  value={generatedDescription}
-                  hiddenLabel
-                  InputProps={{ readOnly: true }}
+            <Popover
+              open={descriptionTooltipOpen}
+              anchorEl={descriptionButtonRef.current}
+              onClose={() => {}}
+              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+              disableAutoFocus
+              disableEnforceFocus
+              PaperProps={{
+                sx: {
+                  p: "8px",
+                  borderRadius: "2px",
+                  border: `1px solid ${BORDER_COLOR}`,
+                  boxShadow: "0px 2px 8px 0px #00000026",
+                  width: 332,
+                  minHeight: 152,
+                },
+              }}
+            >
+              <Stack spacing={1}>
+                <Typography
                   sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "8px",
-                      borderColor: BORDER_COLOR,
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: BORDER_COLOR,
-                      },
-                      "& .MuiOutlinedInput-input": {
-                        py: "8px",
-                        px: "16px",
-                        fontSize: 14,
-                      },
-                    },
-                  }}
-                />
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setField("description", generatedDescription);
-                    setGeneratedDescription("");
-                  }}
-                  sx={{
-                    alignSelf: "flex-start",
-                    minWidth: 108,
-                    height: 32,
-                    borderRadius: "8px",
-                    px: "12px",
-                    bgcolor: "#1890FF",
-                    color: "#FFFFFF",
                     fontFamily: "Roboto, system-ui, sans-serif",
-                    fontWeight: 400,
-                    fontSize: 14,
-                    lineHeight: "22px",
-                    textTransform: "none",
-                    boxShadow: "none",
-                    "&:hover": { bgcolor: "#1677ff", boxShadow: "none" },
+                    fontWeight: 500,
+                    fontSize: 12,
+                    lineHeight: "16px",
+                    color: "#1E1E1E",
                   }}
                 >
-                  Применить описание
-                </Button>
+                  Ответ от AI:
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "Roboto, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: 12,
+                    lineHeight: "16px",
+                    color: "#000000D9",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {descriptionError
+                    ? descriptionError
+                    : generatedDescription || "Нет данных"}
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  {generatedDescription ? (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setField("description", generatedDescription);
+                        setGeneratedDescription("");
+                        setDescriptionTooltipOpen(false);
+                      }}
+                      sx={{
+                        minWidth: 89,
+                        width: 89,
+                        height: 22,
+                        borderRadius: "4px",
+                        px: "7px",
+                        gap: "10px",
+                        bgcolor: "#1890FF",
+                        color: "#FFFFFF",
+                        fontFamily: "Roboto, system-ui, sans-serif",
+                        fontWeight: 400,
+                        fontSize: 14,
+                        lineHeight: "22px",
+                        textAlign: "center",
+                        textTransform: "none",
+                        boxShadow: "0px 2px 0px 0px #0000000B",
+                        "&:hover": {
+                          bgcolor: "#1677ff",
+                          boxShadow: "0px 2px 0px 0px #0000000B",
+                        },
+                      }}
+                    >
+                      Применить
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="button"
+                    onClick={() => setDescriptionTooltipOpen(false)}
+                    sx={{
+                      minWidth: 73,
+                      width: 73,
+                      height: 24,
+                      borderRadius: "4px",
+                      px: "7px",
+                      gap: "10px",
+                      bgcolor: "#FFFFFF",
+                      color: "#000000D9",
+                      border: `1px solid ${BORDER_COLOR}`,
+                      fontFamily: "Roboto, system-ui, sans-serif",
+                      fontWeight: 400,
+                      fontSize: 14,
+                      lineHeight: "22px",
+                      textAlign: "center",
+                      textTransform: "none",
+                      boxShadow: "0px 2px 0px 0px #00000004",
+                      "&:hover": {
+                        bgcolor: "#FFFFFF",
+                        boxShadow: "0px 2px 0px 0px #00000004",
+                      },
+                    }}
+                  >
+                    Закрыть
+                  </Button>
+                </Stack>
               </Stack>
-            ) : null}
+            </Popover>
           </Stack>
         </Stack>
 
