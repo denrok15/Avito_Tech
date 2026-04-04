@@ -23,8 +23,9 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
       <Card
         sx={{
           borderRadius: '16px',
-          border: '1px solid #f0f0f0',
-          bgcolor: '#ffffff',
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
           boxShadow: 'none',
           width: '100%',
           overflow: 'hidden',
@@ -44,7 +45,8 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
               width: 179,
               height: 132,
               flexShrink: 0,
-              bgcolor: '#fafafa',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? '#0F172A' : '#fafafa',
               overflow: 'hidden',
             }}
           >
@@ -77,7 +79,7 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 fontSize: 14,
                 fontWeight: 400,
                 lineHeight: '22px',
-                color: 'rgba(0, 0, 0, 0.45)',
+                color: 'text.secondary',
               }}
             >
               {CATEGORY_LABELS[item.category]}
@@ -92,7 +94,7 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 fontSize: 16,
                 fontWeight: 400,
                 lineHeight: '24px',
-                color: 'rgba(0, 0, 0, 0.85)',
+                color: 'text.primary',
               }}
             >
               {item.title}
@@ -104,7 +106,7 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 fontSize: 16,
                 fontWeight: 600,
                 lineHeight: '140%',
-                color: 'rgba(0, 0, 0, 0.45)',
+                color: 'text.secondary',
               }}
             >
               {formatCurrency(item.price)}
@@ -123,16 +125,17 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                   px: 1,
                   py: '2px',
                   borderRadius: '8px',
-                  bgcolor: '#fff7e6',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? '#2A1B07' : '#fff7e6',
                   fontFamily: '"Roboto", "Arial", sans-serif',
                   fontSize: 14,
                   fontWeight: 400,
                   lineHeight: '22px',
-                  color: '#faad14',
+                  color: 'warning.main',
                   whiteSpace: 'nowrap',
                 }}
               >
-                <Box sx={{ width: 6, height: 6, borderRadius: 999, bgcolor: '#faad14' }} />
+                <Box sx={{ width: 6, height: 6, borderRadius: 999, bgcolor: 'warning.main' }} />
                 Требует доработок
               </Box>
             ) : null}
@@ -146,8 +149,9 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
     <Card
       sx={{
         borderRadius: '16px',
-        border: '1px solid #f0f0f0',
-        bgcolor: '#ffffff',
+        border: '1px solid',
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
         boxShadow: 'none',
         width: { xs: '100%', lg: 200, xl: 220 },
         height: 'auto',
@@ -168,7 +172,8 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 inset: 0,
                 borderBottomRightRadius: '8px',
                 borderBottomLeftRadius: '8px',
-                bgcolor: '#fafafa',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? '#0F172A' : '#fafafa',
               }}
             />
             <CardMedia
@@ -215,13 +220,14 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 height: 22,
                 px: 1.5,
                 borderRadius: '6px',
-                border: '1px solid #d9d9d9',
-                bgcolor: '#ffffff',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'background.paper',
                 fontFamily: '"Roboto", "Arial", sans-serif',
                 fontSize: 14,
                 fontWeight: 400,
                 lineHeight: '22px',
-                color: 'rgba(0, 0, 0, 0.85)',
+                color: 'text.primary',
               }}
             >
               {CATEGORY_LABELS[item.category]}
@@ -236,7 +242,7 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 fontSize: 16,
                 fontWeight: 400,
                 lineHeight: '24px',
-                color: 'rgba(0, 0, 0, 0.85)',
+                color: 'text.primary',
                 minHeight: 48,
               }}
             >
@@ -250,7 +256,7 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                 fontSize: 16,
                 fontWeight: 600,
                 lineHeight: '140%',
-                color: 'rgba(0, 0, 0, 0.45)',
+                color: 'text.secondary',
               }}
             >
               {formatCurrency(item.price)}
@@ -269,16 +275,17 @@ export const AdCard = ({ item, layout, onClick }: AdCardProps) => {
                   px: 1,
                   py: '2px',
                   borderRadius: '8px',
-                  bgcolor: '#fff7e6',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? '#2A1B07' : '#fff7e6',
                   fontFamily: '"Roboto", "Arial", sans-serif',
                   fontSize: 14,
                   fontWeight: 400,
                   lineHeight: '22px',
-                  color: '#faad14',
+                  color: 'warning.main',
                   whiteSpace: 'nowrap',
                 }}
               >
-                <Box sx={{ width: 6, height: 6, borderRadius: 999, bgcolor: '#faad14' }} />
+                <Box sx={{ width: 6, height: 6, borderRadius: 999, bgcolor: 'warning.main' }} />
                 Требует доработок
               </Box>
             ) : null}

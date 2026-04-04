@@ -117,7 +117,7 @@ export const AdsListPage = () => {
             fontSize: 18,
             lineHeight: "100%",
             letterSpacing: 0,
-            color: "#848388",
+            color: "text.secondary",
           }}
         >
           {adsQuery.data?.total ?? 0} объявления
@@ -139,8 +139,9 @@ export const AdsListPage = () => {
             placeholder="Найти объявление..."
             value={query}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "#F4F4F6",
+              "& .MuiOutlinedInput-root": (theme) => ({
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#0F172A" : "#F4F4F6",
                 borderRadius: 1,
                 "& fieldset": {
                   border: "none",
@@ -151,7 +152,7 @@ export const AdsListPage = () => {
                 "&.Mui-focused fieldset": {
                   border: "none",
                 },
-              },
+              }),
             }}
             onChange={(event) => {
               setPage(1);
@@ -161,7 +162,7 @@ export const AdsListPage = () => {
             slotProps={{
               input: {
                 endAdornment: (
-                  <InputAdornment position="end" sx={{ color: "#000000" }}>
+                  <InputAdornment position="end" sx={{ color: "text.primary" }}>
                     <SearchRoundedIcon fontSize="small" />
                   </InputAdornment>
                 ),
@@ -177,7 +178,8 @@ export const AdsListPage = () => {
               px: 0.5,
               py: 0.25,
               borderRadius: "8px",
-              bgcolor: "#F4F4F6",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "#0F172A" : "#F4F4F6",
             }}
           >
             <IconButton
@@ -188,7 +190,8 @@ export const AdsListPage = () => {
                 height: 32,
                 borderRadius: "8px",
                 bgcolor: "transparent",
-                color: layout === "grid" ? "#1890FF" : "#000000",
+                color:
+                  layout === "grid" ? "#1890FF" : "text.secondary",
                 "&:hover": {
                   bgcolor: "transparent",
                 },
@@ -201,7 +204,8 @@ export const AdsListPage = () => {
                 mx: 0.75,
                 width: 0,
                 alignSelf: "stretch",
-                borderLeft: "2px solid #FFFFFF",
+                borderLeft: "2px solid",
+                borderColor: "divider",
               }}
             />
             <IconButton
@@ -212,7 +216,8 @@ export const AdsListPage = () => {
                 height: 32,
                 borderRadius: "8px",
                 bgcolor: "transparent",
-                color: layout === "list" ? "#1890FF" : "#000000",
+                color:
+                  layout === "list" ? "#1890FF" : "text.secondary",
                 "&:hover": {
                   bgcolor: "transparent",
                 },
@@ -245,7 +250,8 @@ export const AdsListPage = () => {
                 "& .MuiOutlinedInput-root": {
                   height: "100%",
                   borderRadius: "8px",
-                  bgcolor: "#F4F4F6",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark" ? "#0F172A" : "#F4F4F6",
                   "& fieldset": {
                     border: "none",
                   },
@@ -265,10 +271,10 @@ export const AdsListPage = () => {
                   fontSize: 14,
                   lineHeight: "22px",
                   letterSpacing: 0,
-                  color: "rgba(0, 0, 0, 0.85)",
+                  color: "text.primary",
                 },
                 "& .MuiSelect-icon": {
-                  color: "#000000",
+                  color: "text.primary",
                   right: 8,
                 },
               }}
@@ -290,10 +296,14 @@ export const AdsListPage = () => {
             aria-label="Сменить тему"
             sx={{
               flexShrink: 0,
-              bgcolor: "#f1f5f9",
-              color: "#475569",
+              width: 40,
+              height: 40,
+              borderRadius: "8px",
+              bgcolor: "background.paper",
+              color: "text.primary",
+              alignSelf: { xs: "flex-start", lg: "center" },
               "&:hover": {
-                bgcolor: "#e2e8f0",
+                bgcolor: "action.hover",
               },
             }}
           >
@@ -404,7 +414,7 @@ export const AdsListPage = () => {
           ) : null}
 
           {adsQuery.data?.total ? (
-            <Stack alignItems="flex-start">
+            <Stack alignItems={{ xs: "center", sm: "flex-start" }}>
               <Pagination
                 page={page}
                 count={totalPages}
@@ -427,10 +437,10 @@ export const AdsListPage = () => {
                   "& .MuiPaginationItem-root.Mui-selected": {
                     border: "1px solid #1890FF",
                     color: "#1890FF",
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "background.paper",
                   },
                   "& .MuiPaginationItem-root.Mui-selected:hover": {
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "background.paper",
                   },
                 }}
               />

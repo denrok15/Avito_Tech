@@ -29,7 +29,7 @@ export const AdsFilters = ({
   onReset,
 }: AdsFiltersProps) => {
   return (
-    <Box sx={{ width: 256, maxWidth: "100%" }}>
+    <Box sx={{ width: { xs: "100%", lg: 256 }, maxWidth: "100%" }}>
       <Card
         sx={{
           width: "100%",
@@ -118,13 +118,13 @@ export const AdsFilters = ({
           mt: 1,
           height: 40,
           width: "100%",
-          backgroundColor: "white",
+          backgroundColor: "background.paper",
           borderRadius: 1,
-          borderColor: "white",
+          borderColor: "divider",
           fontSize: 14,
           fontFamily: "Inter",
           fontWeight: 400,
-          color: "#848388",
+          color: "text.secondary",
           textTransform: "none",
         }}
       >

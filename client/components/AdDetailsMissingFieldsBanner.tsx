@@ -18,7 +18,8 @@ export const AdDetailsMissingFieldsBanner = ({
         px: 2,
         py: 1.5,
         borderRadius: "8px",
-        bgcolor: "#F9F1E6",
+        bgcolor: (theme) =>
+          theme.palette.mode === "dark" ? "#2A1B07" : "#F9F1E6",
       }}
     >
       <Stack spacing={1}>
@@ -31,7 +32,7 @@ export const AdDetailsMissingFieldsBanner = ({
             fontWeight: 600,
             fontSize: 16,
             lineHeight: "24px",
-            color: "#1E1E1E",
+            color: "text.primary",
           }}
         >
           <AlertIcon />
@@ -45,7 +46,7 @@ export const AdDetailsMissingFieldsBanner = ({
             fontSize: 14,
             paddingLeft: "32px",
             lineHeight: "24px",
-            color: "#000000D9",
+            color: "text.primary",
           }}
         >
           У объявления не заполнены поля:
@@ -61,7 +62,7 @@ export const AdDetailsMissingFieldsBanner = ({
                 fontSize: 14,
                 marginLeft: "32px",
                 lineHeight: "22px",
-                color: "rgba(0, 0, 0, 0.85)",
+                color: "text.primary",
               }}
             >
               {field}

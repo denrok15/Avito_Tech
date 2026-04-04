@@ -61,6 +61,7 @@ export const CategoryParamsFields = ({
     <Stack spacing={2}>
       {fields.map(field => {
         const value = params[field.key] ?? '';
+        const showWarning = !String(value).trim();
         const endAdornment =
           field.type !== 'select' && value ? (
             <InputAdornment position="end" sx={{ mr: 0.5 }}>
@@ -101,13 +102,13 @@ export const CategoryParamsFields = ({
               sx={{
                 ...INPUT_SX,
                 '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#D9D9D9',
+                  borderColor: showWarning ? '#FFA940' : '#D9D9D9',
                 },
                 '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#D9D9D9',
+                  borderColor: showWarning ? '#FFA940' : '#D9D9D9',
                 },
                 '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#D9D9D9',
+                  borderColor: showWarning ? '#FFA940' : '#D9D9D9',
                   borderWidth: 1,
                 },
               }}

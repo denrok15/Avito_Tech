@@ -61,6 +61,9 @@ export const AiAssistantPanel = ({
                 <AutoAwesomeRoundedIcon />
               )
             }
+            sx={{
+              marginBottom: 6,
+            }}
             onClick={onGenerateDescription}
             disabled={isGeneratingDescription}
           >

@@ -1,14 +1,17 @@
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import {
   Alert,
   Box,
   Button,
   Divider,
+  Snackbar,
   Stack,
   Typography,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { loadAdByIdQuery } from '@/api';
 import { AdDetailsMissingFieldsBanner, PageState } from '@/components';
 import { PARAM_LABELS, PLACEHOLDER_IMAGE } from '@/shared/consts';
@@ -53,8 +56,17 @@ const formatDateTime = (isoDate: string): string =>
 
 export const AdDetailsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const id = Number(params.id);
+  const [savedSnackbarOpen, setSavedSnackbarOpen] = useState(false);
+
+  useEffect(() => {
+    if (location.state && (location.state as { showSaved?: boolean }).showSaved) {
+      setSavedSnackbarOpen(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   const adQuery = useQuery(loadAdByIdQuery(id));
 
@@ -80,7 +92,8 @@ export const AdDetailsPage = () => {
   );
 
   return (
-    <Stack spacing={4}>
+    <>
+      <Stack spacing={4}>
       <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2}>
         <Stack spacing={1}>
           <Typography
@@ -90,7 +103,7 @@ export const AdDetailsPage = () => {
               fontSize: 30,
               lineHeight: '40px',
               letterSpacing: 0,
-              color: 'rgba(0, 0, 0, 0.85)',
+              color: 'text.primary',
             }}
           >
             {adQuery.data.title}
@@ -125,7 +138,7 @@ export const AdDetailsPage = () => {
               fontSize: 30,
               lineHeight: '40px',
               letterSpacing: 0,
-              color: 'rgba(0, 0, 0, 0.85)',
+              color: 'text.primary',
             }}
           >
             {formatCurrency(adQuery.data.price)}
@@ -137,7 +150,7 @@ export const AdDetailsPage = () => {
               fontSize: 16,
               lineHeight: '100%',
               letterSpacing: 0,
-              color: '#848388',
+              color: 'text.secondary',
             }}
           >
             Опубликовано: {formatDateTime(adQuery.data.createdAt)}
@@ -149,7 +162,7 @@ export const AdDetailsPage = () => {
               fontSize: 16,
               lineHeight: '100%',
               letterSpacing: 0,
-              color: '#848388',
+              color: 'text.secondary',
             }}
           >
             Отредактировано: {formatDateTime(adQuery.data.updatedAt)}
@@ -172,9 +185,10 @@ export const AdDetailsPage = () => {
           <Box
             sx={{
               width: '100%',
-              maxWidth: 480,
-              height: 360,
-              bgcolor: '#f5f5f5',
+              maxWidth: { xs: '100%', lg: 480 },
+              height: { xs: 220, sm: 280, md: 320, lg: 360 },
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? '#0F172A' : '#f5f5f5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -189,7 +203,7 @@ export const AdDetailsPage = () => {
                 width: '100%',
                 height: '100%',
                 objectFit: 'contain',
-                p: 6,
+                p: { xs: 3, md: 6 },
                 opacity: 0.65,
               }}
             />
@@ -199,7 +213,7 @@ export const AdDetailsPage = () => {
             spacing={2}
             sx={{
               width: '100%',
-              maxWidth: 480,
+              maxWidth: { xs: '100%', lg: 480 },
               minHeight: 132,
             }}
           >
@@ -209,12 +223,12 @@ export const AdDetailsPage = () => {
                 fontWeight: 500,
                 fontSize: 22,
                 lineHeight: '28px',
-                color: '#1E1E1E',
+                color: 'text.primary',
               }}
             >
               Описание
             </Typography>
-            <Typography sx={{ fontFamily: '"Inter", sans-serif', fontSize: 16, lineHeight: '140%', color: '#262626' }}>
+            <Typography sx={{ fontFamily: '"Inter", sans-serif', fontSize: 16, lineHeight: '140%', color: 'text.primary' }}>
               {adQuery.data.description?.trim() || 'Описание отсутствует'}
             </Typography>
           </Stack>
@@ -230,7 +244,7 @@ export const AdDetailsPage = () => {
                 fontWeight: 500,
                 fontSize: 22,
                 lineHeight: '28px',
-                color: '#1E1E1E',
+                color: 'text.primary',
                 mb: 2,
               }}
             >
@@ -249,7 +263,7 @@ export const AdDetailsPage = () => {
                         fontWeight: 600,
                         fontSize: 16,
                         lineHeight: '140%',
-                        color: 'rgba(0, 0, 0, 0.45)',
+                        color: 'text.secondary',
                       }}
                     >
                       {PARAM_LABELS[key] ?? key}
@@ -260,7 +274,7 @@ export const AdDetailsPage = () => {
                         fontWeight: 400,
                         fontSize: 16,
                         lineHeight: '140%',
-                        color: 'rgba(0, 0, 0, 0.85)',
+                        color: 'text.primary',
                       }}
                     >
                       {humanizeParamValue(value)}
@@ -269,11 +283,48 @@ export const AdDetailsPage = () => {
                 ))}
               </Stack>
             ) : (
-              <Typography sx={{ fontSize: 16, color: '#8c8c8c' }}>Характеристики пока не заполнены</Typography>
+              <Typography sx={{ fontSize: 16, color: 'text.secondary' }}>
+                Характеристики пока не заполнены
+              </Typography>
             )}
           </Box>
         </Stack>
       </Box>
-    </Stack>
+      </Stack>
+      <Snackbar
+        open={savedSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSavedSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Box
+          sx={{
+            width: 328,
+            height: 40,
+            borderRadius: '2px',
+            px: '16px',
+            py: '9px',
+            border: '1px solid #B7EB8F',
+            bgcolor: '#F6FFED',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+          }}
+        >
+          <CheckCircleRoundedIcon sx={{ fontSize: 18, color: '#52C41A' }} />
+          <Typography
+            sx={{
+              fontFamily: '"Roboto", "Arial", sans-serif',
+              fontWeight: 400,
+              fontSize: 14,
+              lineHeight: '22px',
+              color: '#1E1E1E',
+            }}
+          >
+            Изменения сохранены
+          </Typography>
+        </Box>
+      </Snackbar>
+    </>
   );
 };

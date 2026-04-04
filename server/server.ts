@@ -20,9 +20,27 @@ fastify.use((_, __, next) =>
 );
 
 // Настройка CORS
-fastify.use((_, reply, next) => {
-  reply.setHeader('Access-Control-Allow-Origin', '*');
-  next();
+fastify.addHook('onRequest', (request, reply, done) => {
+  reply.header('Access-Control-Allow-Origin', '*');
+  reply.header(
+    'Access-Control-Allow-Methods',
+    'GET,PUT,POST,DELETE,OPTIONS',
+  );
+  reply.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization',
+  );
+
+  if (request.method === 'OPTIONS') {
+    reply.status(204).send();
+    return;
+  }
+
+  done();
+});
+
+fastify.options('*', (_request, reply) => {
+  reply.status(204).send();
 });
 
 interface ItemGetRequest extends Fastify.RequestGenericInterface {
